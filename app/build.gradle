@@ -3,9 +3,9 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.app.androidlivetv"
+        applicationId "com.molaapp.iptv"
         manifestPlaceholders = [manifestApplicationId: "${applicationId}",
-                                onesignal_app_id: "0e611d58-a9f2-4665-80c0-3334f0756f82",
+                                onesignal_app_id: "25e69f53-8982-4f20-9fd9-63c3d1c38130",
                                 onesignal_google_project_number: "REMOTE"]
         minSdkVersion 17
         targetSdkVersion 28
