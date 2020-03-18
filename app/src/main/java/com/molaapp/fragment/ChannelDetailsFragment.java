@@ -39,8 +39,6 @@ import com.molaapp.iptv.R;
 import com.molaapp.iptv.ReportChannelActivity;
 import com.molaapp.iptv.TVPlayActivity;
 import com.molaapp.iptv.YtPlayActivity;
-import com.molaapp.cast.Casty;
-import com.molaapp.cast.MediaData;
 import com.molaapp.db.DatabaseHelper;
 import com.molaapp.item.ItemChannel;
 import com.molaapp.util.Constant;
@@ -80,7 +78,6 @@ public class ChannelDetailsFragment extends Fragment {
     boolean isFromNotification = false;
     Menu menu;
     DatabaseHelper databaseHelper;
-    private Casty casty;
     MyApplication myApp;
     View v1;
 
@@ -161,28 +158,23 @@ public class ChannelDetailsFragment extends Fragment {
         imagePlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (casty.isConnected()) {
-                    playViaCast();
-                } else {
-                    if (objBean.isTv()) {
-                        if (myApp.getExternalPlayer()) {
-                            showExternalPlay();
-                        } else {
-                            Intent intent = new Intent(getActivity(), TVPlayActivity.class);
-                            intent.putExtra("videoUrl", objBean.getChannelUrl());
-                            startActivity(intent);
-                        }
+                if (objBean.isTv()) {
+                    if (myApp.getExternalPlayer()) {
+                        showExternalPlay();
                     } else {
-                        String videoId = NetworkUtils.getVideoId(objBean.getChannelUrl());
-                        Intent intent = new Intent(getActivity(), YtPlayActivity.class);
-                        intent.putExtra("id", videoId);
+                        Intent intent = new Intent(getActivity(), TVPlayActivity.class);
+                        intent.putExtra("videoUrl", objBean.getChannelUrl());
                         startActivity(intent);
                     }
+                } else {
+                    String videoId = NetworkUtils.getVideoId(objBean.getChannelUrl());
+                    Intent intent = new Intent(getActivity(), YtPlayActivity.class);
+                    intent.putExtra("id", videoId);
+                    startActivity(intent);
                 }
             }
         });
 
-        casty = Casty.create(getActivity());
         return rootView;
 
     }
@@ -286,23 +278,12 @@ public class ChannelDetailsFragment extends Fragment {
         CommentFragment commentFragment = CommentFragment.newInstance(Id);
         fragmentManager.beginTransaction().replace(R.id.comment_container, commentFragment).commit();
 
-        casty.setOnConnectChangeListener(new Casty.OnConnectChangeListener() {
-            @Override
-            public void onConnected() {
-                playViaCast();
-            }
 
-            @Override
-            public void onDisconnected() {
-
-            }
-        });
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
-        casty.addMediaRouteMenuItem(menu);
         inflater.inflate(R.menu.menu_details, menu);
         this.menu = menu;
         isFavourite();
@@ -448,24 +429,8 @@ public class ChannelDetailsFragment extends Fragment {
         v1.requestFocus();
     }
 
-    private void playViaCast() {
-        if (objBean.isTv()) {
-            casty.getPlayer().loadMediaAndPlay(createSampleMediaData(objBean.getChannelUrl(), objBean.getChannelName(), objBean.getImage()));
-        } else {
-            showToast(getResources().getString(R.string.cast_youtube));
-        }
-    }
 
-    private MediaData createSampleMediaData(String videoUrl, String videoTitle, String videoImage) {
-        return new MediaData.Builder(videoUrl)
-                .setStreamType(MediaData.STREAM_TYPE_BUFFERED)
-                .setContentType("videos/mp4")
-                .setMediaType(MediaData.MEDIA_TYPE_MOVIE)
-                .setTitle(videoTitle)
-                .setSubtitle(getString(R.string.app_name))
-                .addPhotoUrl(videoImage)
-                .build();
-    }
+
 
     private void showExternalPlay() {
         final Dialog mDialog = new Dialog(requireActivity(), R.style.Theme_AppCompat_Translucent);

@@ -29,8 +29,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.molaapp.adapter.RelatedAdapter;
-import com.molaapp.cast.Casty;
-import com.molaapp.cast.MediaData;
 import com.molaapp.db.DatabaseHelper;
 import com.molaapp.fragment.CommentFragment;
 import com.molaapp.item.ItemChannel;
@@ -73,7 +71,6 @@ public class ChannelDetailsActivity extends AppCompatActivity {
     boolean isFromNotification = false;
     Menu menu;
     DatabaseHelper databaseHelper;
-    private Casty casty;
     MyApplication myApp;
 
     @Override
@@ -94,8 +91,7 @@ public class ChannelDetailsActivity extends AppCompatActivity {
         }
         LinearLayout mAdViewLayout = findViewById(R.id.adView);
         BannerAds.ShowBannerAds(getApplicationContext(), mAdViewLayout);
-        casty = Casty.create(this)
-                .withMiniController();
+
         myApp = MyApplication.getInstance();
         databaseHelper = new DatabaseHelper(getApplicationContext());
         fragmentManager = getSupportFragmentManager();
@@ -167,23 +163,19 @@ public class ChannelDetailsActivity extends AppCompatActivity {
         imagePlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (casty.isConnected()) {
-                    playViaCast();
-                } else {
-                    if (objBean.isTv()) {
-                        if (myApp.getExternalPlayer()) {
-                            showExternalPlay();
-                        } else {
-                            Intent intent = new Intent(ChannelDetailsActivity.this, TVPlayActivity.class);
-                            intent.putExtra(Constant.CHANNEL_URL, objBean.getChannelUrl());
-                            startActivity(intent);
-                        }
+                if (objBean.isTv()) {
+                    if (myApp.getExternalPlayer()) {
+                        showExternalPlay();
                     } else {
-                        String videoId = NetworkUtils.getVideoId(objBean.getChannelUrl());
-                        Intent intent = new Intent(ChannelDetailsActivity.this, YtPlayActivity.class);
-                        intent.putExtra("id", videoId);
+                        Intent intent = new Intent(ChannelDetailsActivity.this, TVPlayActivity.class);
+                        intent.putExtra(Constant.CHANNEL_URL, objBean.getChannelUrl());
                         startActivity(intent);
                     }
+                } else {
+                    String videoId = NetworkUtils.getVideoId(objBean.getChannelUrl());
+                    Intent intent = new Intent(ChannelDetailsActivity.this, YtPlayActivity.class);
+                    intent.putExtra("id", videoId);
+                    startActivity(intent);
                 }
             }
         });
@@ -292,7 +284,6 @@ public class ChannelDetailsActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        casty.addMediaRouteMenuItem(menu);
         getMenuInflater().inflate(R.menu.menu_details, menu);
         this.menu = menu;
         isFavourite();
@@ -443,24 +434,9 @@ public class ChannelDetailsActivity extends AppCompatActivity {
         v1.requestFocus();
     }
 
-    private void playViaCast() {
-        if (objBean.isTv()) {
-            casty.getPlayer().loadMediaAndPlay(createSampleMediaData(objBean.getChannelUrl(), objBean.getChannelName(), objBean.getImage()));
-        } else {
-            showToast(getResources().getString(R.string.cast_youtube));
-        }
-    }
 
-    private MediaData createSampleMediaData(String videoUrl, String videoTitle, String videoImage) {
-        return new MediaData.Builder(videoUrl)
-                .setStreamType(MediaData.STREAM_TYPE_BUFFERED)
-                .setContentType(getType(videoUrl))
-                .setMediaType(MediaData.MEDIA_TYPE_MOVIE)
-                .setTitle(videoTitle)
-                .setSubtitle(getString(R.string.app_name))
-                .addPhotoUrl(videoImage)
-                .build();
-    }
+
+
 
     private String getType(String videoUrl) {
         if (videoUrl.endsWith(".mp4")) {
