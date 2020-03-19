@@ -4,6 +4,14 @@ dependencies {
 }
 
 android {
+    signingConfigs {
+        rilis {
+            storeFile file('C:\\Users\\FANDO\\test.jks')
+            storePassword 'Palang66'
+            keyAlias = 'test'
+            keyPassword 'Palang66'
+        }
+    }
     compileSdkVersion 27
     defaultConfig {
         minSdkVersion 17
@@ -19,6 +27,11 @@ android {
             res.srcDirs = ['res']
         }
 
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.rilis
+        }
     }
 
 }
